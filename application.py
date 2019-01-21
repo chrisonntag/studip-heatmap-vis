@@ -11,7 +11,8 @@ from flask import Flask, Response
 from flask import jsonify
 from flask import request
 
-import database
+import database as db
+from database import User, DayAction
 import studip
 
 
@@ -55,6 +56,18 @@ def get_error(msg):
     return jsonify({'result': 'ERROR', 'message': msg})
 
 
+# Open database connection before requests and close them afterwards
+@app.before_request
+def before_request():
+    db.DATABASE.connect()
+
+
+@app.after_request
+def after_request(response):
+    db.DATABASE.close()
+    return response
+
+
 @app.route('/', methods=['GET'])
 def root():
     content = get_file('index.html')
@@ -82,23 +95,38 @@ def get_resource(path):
 def register():
     username = bleach.clean(request.form['username'])
     key = uuid.uuid4().hex
-    if database.get_user(username) == None and studip.is_valid(username):
-        database.register(username, key)
-        return jsonify({'username': username, 'key': key})
+
+    if not db.user_exists(username, key) and studip.is_valid(username):
+        points = studip.get_points(username)
+        rank = studip.get_rank(username)
+
+        try:
+            db.create_user(username, key, points, rank)
+        except IntegrityError:
+            return get_error('Could not create user.')
+
+        return jsonify({'username': username, 'key': key, 'points': points, 'rank': rank})
     else:
         return get_error('Username not available in Stud.IP or already registered in this service.')
 
 
-@app.route("/heatmap", methods=["GET"])
+@app.route("/heatmap", methods=['GET'])
 @print_exceptions
 def get_data_heatmap():
     # TODO: Implement
-    username = request.args.get('u', None)
-    key = request.args.get('k', None)
-    if username is not None and key is not None:
-        return jsonify({'username': username, 'key': key})
+    username = request.args.get('user', None)
+    key = request.args.get('uuid', None)
+    if db.user_exists(username, key):
+        user = User.get(User.username == username, User.key == key)
+        days = DayAction.select().where(DayAction.user == user)
+
+        result = dict()
+        for day in days:
+            result[str(day.date)] = day.actions
+
+        return jsonify(result)
     else:
-        return get_error('No username and key.')
+        return get_error('No username or wrong key.')
 
 
 if __name__ == '__main__':
