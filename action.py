@@ -7,7 +7,7 @@ from studip import get_points
 def calc_action_number(current_points, previous_points):
     gained = current_points - previous_points
 
-    if gained >= 100:
+    if gained >= 50:
         vals = [(1/(2**n))*100 for n in range(0, 12)]
         for i in range(1, len(vals)):
             vals[i] = vals[i] + vals[i-1]
