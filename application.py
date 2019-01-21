@@ -7,11 +7,12 @@ import datetime
 import bleach
 from collections import defaultdict
 
-from flask import Flask, Response
+from flask import Flask, Response, render_template, make_response
 from flask import jsonify
 from flask import request
 
 import database as db
+import heatmap
 from database import User, DayAction
 import studip
 
@@ -113,7 +114,7 @@ def register():
 @app.route("/heatmap", methods=['GET'])
 @print_exceptions
 def get_data_heatmap():
-    # TODO: Implement
+    # TODO: Implement png output
     username = request.args.get('user', None)
     key = request.args.get('uuid', None)
     if db.user_exists(username, key):
@@ -124,7 +125,10 @@ def get_data_heatmap():
         for day in days:
             result[str(day.date)] = day.actions
 
-        return jsonify(result)
+        response=make_response(heatmap.generate_image(result).getvalue())
+        response.headers['Content-Type'] = 'image/png'
+        return response
+        # return jsonify(result)
     else:
         return get_error('No username or wrong key.')
 
