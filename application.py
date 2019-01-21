@@ -114,7 +114,6 @@ def register():
 @app.route("/heatmap", methods=['GET'])
 @print_exceptions
 def get_data_heatmap():
-    # TODO: Implement png output
     username = request.args.get('user', None)
     key = request.args.get('uuid', None)
     if db.user_exists(username, key):
