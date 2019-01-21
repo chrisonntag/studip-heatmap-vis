@@ -19,7 +19,7 @@ class User(BaseModel):
 
 class DayAction(BaseModel):
     user = ForeignKeyField(User, backref='actions')
-    actions = IntegerField()
+    actions = IntegerField(default=0)
     date = DateField(default=datetime.date.today())
 
 

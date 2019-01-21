@@ -156,7 +156,7 @@ def prepare_heatmap(activity_data):
 
     # Use a discrete color map with 5 colors (the data ranges from 0 to 4).
     # Extending the color limits by 0.5 aligns the ticks in the color bar.
-    cmap = mpl.cm.get_cmap('Greens', 9)
+    cmap = mpl.cm.get_cmap('YlGn', 9)
     plt.set_cmap(cmap)
     plt.clim(-0.5, 9.5)
 
