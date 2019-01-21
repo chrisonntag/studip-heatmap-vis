@@ -18,9 +18,8 @@ from matplotlib.dates import DateFormatter
 
 def generate_image(data):
     fig = prepare_heatmap(data)
-    canvas=FigureCanvas(fig)
     png_output = BytesIO()
-    canvas.print_png(png_output)
+    plt.savefig(png_output, format='png', bbox_inches='tight')
     data = b64encode(png_output.getvalue()).decode('ascii')
     data_url = 'data:image/png;base64,{}'.format(quote(data))
 
