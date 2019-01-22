@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 from weakref import WeakSet
 from datetime import datetime
 import aiohttp
+import warnings
 from aiohttp import ClientError
 
 from parsers import *
@@ -133,6 +134,8 @@ def get_points(username):
     try:
         event_loop.run_until_complete(session.do_login())
         points = event_loop.run_until_complete(session.get_user_points(username))
+    except Exception as e:
+        return None
     finally:
         async def shutdown_session_async(session):
             await session.close()

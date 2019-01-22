@@ -7,7 +7,7 @@ import datetime
 import bleach
 from collections import defaultdict
 
-from flask import Flask, Response, render_template, make_response
+from flask import Flask, Response, render_template, make_response, url_for, redirect
 from flask import jsonify
 from flask import request
 
@@ -19,7 +19,7 @@ import studip
 
 STATIC_DIR = '/static'
 
-app = Flask(__name__, static_url_path=STATIC_DIR)
+app = Flask(__name__, static_url_path=STATIC_DIR, template_folder='static')
 app.debug = True
 
 
@@ -103,12 +103,23 @@ def register():
 
         try:
             db.create_user(username, key, points, rank)
-        except IntegrityError:
+        except db.IntegrityError:
             return get_error('Could not create user.')
 
-        return jsonify({'username': username, 'key': key, 'points': points, 'rank': rank})
+        # return jsonify({'username': username, 'key': key, 'points': points, 'rank': rank})
+        return redirect(url_for('show_user', username=username) + '?uuid=' + str(key))
     else:
         return get_error('Username not available in Stud.IP or already registered in this service.')
+
+
+@app.route('/user/<username>', methods=['GET'])
+@print_exceptions
+def show_user(username=None):
+    key = request.args.get('uuid', None)
+    if db.user_exists(username, key):
+        url = request.url_root[:-1] + url_for('get_data_heatmap')+'?user='+username+'&uuid='+str(key)
+        return render_template('/overview.html', image_url=url)
+
 
 
 @app.route("/heatmap", methods=['GET'])
