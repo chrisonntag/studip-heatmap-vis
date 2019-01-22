@@ -116,10 +116,11 @@ def register():
 @print_exceptions
 def show_user(username=None):
     key = request.args.get('uuid', None)
-    if db.user_exists(username, key):
+    if username is not None and key is not None and db.user_exists(username, key):
         url = request.url_root[:-1] + url_for('get_data_heatmap')+'?user='+username+'&uuid='+str(key)
         return render_template('/overview.html', image_url=url)
-
+    else:
+        return get_error('Specify username and uuid.')
 
 
 @app.route("/heatmap", methods=['GET'])
