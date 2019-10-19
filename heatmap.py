@@ -151,13 +151,13 @@ def prepare_heatmap(activity_data):
 
     # Plot the heatmap with a color bar.
     ax = date_heatmap(data, edgecolor='black')
-    plt.colorbar(ticks=range(9), pad=0.02)
+    plt.colorbar(ticks=range(5), pad=0.05)
 
     # Use a discrete color map with 5 colors (the data ranges from 0 to 4).
     # Extending the color limits by 0.5 aligns the ticks in the color bar.
-    cmap = mpl.cm.get_cmap('YlGn', 9)
+    cmap = mpl.cm.get_cmap('YlGn', 5)
     plt.set_cmap(cmap)
-    plt.clim(-0.5, 9.5)
+    plt.clim(-0.5, 5.5)
 
     # Force the cells to be square. If this is set, the size of the color bar
     # may look weird compared to the size of the heatmap. That can be corrected
